@@ -40,7 +40,7 @@ struct winsize getTermSize() {
 
 int get_cursor_offset (Cursor cursor){
     struct winsize win = getTermSize();     
-    return win.ws_col * cursor.y + cursor.x
+    return win.ws_col * ( cursor.y - 1 ) + cursor.x;
 }
 
 void term_goto(int x, int y) {
