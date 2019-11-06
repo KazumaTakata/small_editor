@@ -41,7 +41,6 @@ Line_contents split_by_newline(char *content, int size) {
   return lc;
 }
 
-
 int main(int argc, char *argv[]) {
   char *filename = argv[1];
   char *cur_buffer = NULL;
@@ -56,8 +55,7 @@ int main(int argc, char *argv[]) {
 
   Line_contents line_contents = split_by_newline(cur_buffer, size);
 
-
-//  Content_buffer buffer = {cur_buffer , size, size }; 
+  //  Content_buffer buffer = {cur_buffer , size, size };
   int i = 0;
   term_clear();
   term_goto(cur_cursor.x, cur_cursor.y);
@@ -67,26 +65,27 @@ int main(int argc, char *argv[]) {
 
   char c;
   while (read(STDIN_FILENO, &c, 1) == 1 && c != 'q') {
-  if (iscntrl(c)) {
-  if (c == '\033') {
-  read(STDIN_FILENO, &c, 1);
-  if (c == '[') {
-  read(STDIN_FILENO, &c, 1);
-  move_cursor(c, &cur_cursor);
-  }
-  } else {
-  if (c == 127) {
-  process_backspace(line_contents , &cur_cursor);
-  fflush(stdout);
-  } else {
-  printf("%d", c);
-  fflush(stdout);
-  }
-  }
-  } else {
-  printf("%d ('%c')", c, c);
-  fflush(stdout);
-  }
+    if (iscntrl(c)) {
+      if (c == '\033') {
+        read(STDIN_FILENO, &c, 1);
+        if (c == '[') {
+          read(STDIN_FILENO, &c, 1);
+          move_cursor(c, &cur_cursor);
+        }
+      } else {
+        if (c == 127) {
+          process_backspace(line_contents, &cur_cursor);
+          fflush(stdout);
+        } else {
+          printf("%d", c);
+          fflush(stdout);
+        }
+      }
+    } else {
+      process_insert(line_contents, &cur_cursor, c);
+      //printf("%d ('%c')", c, c);
+      //fflush(stdout);
+    }
   }
   post_process();
 }
