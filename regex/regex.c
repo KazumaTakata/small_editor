@@ -1,148 +1,49 @@
+#include "regex.h"
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-typedef struct Edge Edge;
-typedef struct Node Node;
+void test4() {
 
-typedef struct Edge {
-  char ch;
-  Node *next;
-} Edge;
+  char *regex_code = "abb";
+  Frag ff = constructNFA(regex_code);
 
-// if size == 0 : node is goal node
-typedef struct Node {
-  Edge *edge1;
-  Edge *edge2;
-  int size;
+  bool ifmatched = match(ff, regex_code);
 
-} Node;
+  assert(ifmatched == true);
+}
+void test5() {
 
-typedef struct Frag {
-  Node *start;
-  Edge **outEdge;
-  int size;
-} Frag;
+  char *regex_code = "abb";
+  Frag ff = constructNFA(regex_code);
 
-typedef struct NodeList {
-  Node **nodes;
-  int size;
-} NodeList;
+  bool ifmatched = match(ff, "ac");
 
-bool ifContainGoal(NodeList list) {
-  if (list.size == 0) {
-    return false;
-  }
-
-  for (int i = 0; i < list.size; i++) {
-    if (list.nodes[i]->size == 0) {
-      return true;
-    }
-  }
-
-  return false;
+  assert(ifmatched == false);
 }
 
-Frag GenConcatFrag(Frag frag1, Frag frag2) {
+void test6() {
 
-  for (int i = 0; i < frag1.size; i++) {
-    frag1.outEdge[i]->next = frag2.start;
-  }
-  Frag frag = {frag1.start, frag2.outEdge, frag2.size};
+  char *regex_code = "abbaeed";
+  Frag ff = constructNFA3(regex_code);
 
-  return frag;
+  bool ifmatched = match(ff, "abbaeed");
+
+  assert(ifmatched == true);
 }
 
-Frag GenAlternationFrag(Frag frag1, Frag frag2) {
-  Node *node = malloc(sizeof(Node));
-  node->size = 2;
+void test7() {
 
-  Edge *edge1 = malloc(sizeof(Edge));
-  edge1->ch = 0;
-  edge1->next = frag1.start;
+  char *regex_code = "abbee";
+  Frag ff = constructNFA3(regex_code);
 
-  Edge *edge2 = malloc(sizeof(Edge));
-  edge2->ch = 0;
-  edge2->next = frag2.start;
+  bool ifmatched = match(ff, "abbee");
 
-  node->edge1 = edge1;
-  node->edge2 = edge2;
-
-  Edge **out = malloc(sizeof(Edge **) * (frag1.size + frag2.size));
-  for (int i = 0; i < frag1.size; i++) {
-    out[i] = frag1.outEdge[i];
-  }
-  for (int i = 0; i < frag2.size; i++) {
-    out[i + frag1.size] = frag2.outEdge[i];
-  }
-
-  Frag frag = {node, out, frag2.size + frag1.size};
-
-  return frag;
+  assert(ifmatched== true);
 }
 
-Frag GenGoalFrag() {
-
-  Node *node = malloc(sizeof(Node));
-  node->size = 0;
-
-  Frag goalFrag = {node, NULL, 0};
-
-  return goalFrag;
-}
-
-Frag GenLiteralFrag(char ch) {
-
-  Node *node = malloc(sizeof(Node));
-  node->size = 1;
-
-  Edge *edge = malloc(sizeof(Edge));
-  edge->ch = ch;
-  edge->next = NULL;
-
-  node->edge1 = edge;
-  Edge **out = malloc(sizeof(Edge **));
-  out[0] = edge;
-  Frag frag = {node, out, 1};
-
-  return frag;
-}
-
-NodeList step(NodeList state, char ch) {
-  Node **nodes = malloc(sizeof(Node *) * 100);
-  int numberOfNodes = 0;
-  for (int i = 0; i < state.size; i++) {
-    if (state.nodes[i]->edge1->ch == ch) {
-      nodes[numberOfNodes] = state.nodes[i]->edge1->next;
-      numberOfNodes++;
-    }
-  }
-
-  NodeList nodelist = {nodes, numberOfNodes};
-
-  return nodelist;
-}
-
-Frag constructNFA2(char *regex) {
-  Frag frag1 = GenLiteralFrag('a');
-  Frag frag2 = GenLiteralFrag('b');
-  Frag goal = GenGoalFrag();
-
-  Frag frag3 = GenAlternationFrag(frag1, frag2);
-  Frag frag4 = GenConcatFrag(frag3, goal);
-
-  return frag4;
-}
-Frag constructNFA(char *regex) {
-  Frag frag1 = GenLiteralFrag(regex[0]);
-  Frag frag2 = GenLiteralFrag(regex[1]);
-  Frag frag3 = GenLiteralFrag(regex[2]);
-
-  Frag frag4 = GenConcatFrag(frag1, frag2);
-  Frag frag5 = GenConcatFrag(frag4, frag3);
-
-  return frag5;
-}
 void test3() {
 
   char *regex_code = "abb";
@@ -161,6 +62,14 @@ void test3() {
   assert(nodelist3.nodes[0]->edge1->ch == 'b');
 
   assert(nodelist3.size == 1);
+
+  NodeList nodelist5 = step(nodelist3, 'b');
+
+  assert(nodelist5.nodes[0]->size == 0);
+
+  bool ifcontain = ifContainGoal(nodelist5);
+
+  assert(ifcontain == true);
 
   NodeList nodelist4 = step(nodelist2, 'c');
   assert(nodelist4.size == 0);
@@ -237,4 +146,8 @@ int main() {
   /*test2();*/
 
   test3();
+  test4();
+  test5();
+  test6();
+  test7();
 }
