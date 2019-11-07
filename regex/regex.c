@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,6 +10,7 @@ typedef struct Edge {
   Node *next;
 } Edge;
 
+// if size == 0 : node is goal node
 typedef struct Node {
   Edge *edge1;
   Edge *edge2;
@@ -21,6 +23,25 @@ typedef struct Frag {
   Edge **outEdge;
   int size;
 } Frag;
+
+typedef struct NodeList {
+  Node **nodes;
+  int size;
+} NodeList;
+
+bool ifContainGoal(NodeList list) {
+  if (list.size == 0) {
+    return false;
+  }
+
+  for (int i = 0; i < list.size; i++) {
+    if (list.nodes[i]->size == 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 Frag GenConcatFrag(Frag frag1, Frag frag2) {
 
@@ -60,6 +81,16 @@ Frag GenAlternationFrag(Frag frag1, Frag frag2) {
   return frag;
 }
 
+Frag GenGoalFrag() {
+
+  Node *node = malloc(sizeof(Node));
+  node->size = 0;
+
+  Frag goalFrag = {node, NULL, 0};
+
+  return goalFrag;
+}
+
 Frag GenLiteralFrag(char ch) {
 
   Node *node = malloc(sizeof(Node));
@@ -77,13 +108,30 @@ Frag GenLiteralFrag(char ch) {
   return frag;
 }
 
+NodeList step(NodeList state, char ch) {
+  Node **nodes = malloc(sizeof(Node *) * 100);
+  int numberOfNodes = 0;
+  for (int i = 0; i < state.size; i++) {
+    if (state.nodes[i]->edge1->ch == ch) {
+      nodes[numberOfNodes] = state.nodes[i]->edge1->next;
+      numberOfNodes++;
+    }
+  }
+
+  NodeList nodelist = {nodes, numberOfNodes};
+
+  return nodelist;
+}
+
 Frag constructNFA2(char *regex) {
   Frag frag1 = GenLiteralFrag('a');
   Frag frag2 = GenLiteralFrag('b');
+  Frag goal = GenGoalFrag();
 
   Frag frag3 = GenAlternationFrag(frag1, frag2);
+  Frag frag4 = GenConcatFrag(frag3, goal);
 
-  return frag3;
+  return frag4;
 }
 Frag constructNFA(char *regex) {
   Frag frag1 = GenLiteralFrag(regex[0]);
@@ -95,8 +143,33 @@ Frag constructNFA(char *regex) {
 
   return frag5;
 }
+void test3() {
 
-void test2(Frag ff) {
+  char *regex_code = "abb";
+  Frag ff = constructNFA(regex_code);
+
+  NodeList nodelist1 = {&ff.start, 1};
+
+  NodeList nodelist2 = step(nodelist1, 'a');
+
+  assert(nodelist2.nodes[0]->edge1->ch == 'b');
+
+  assert(nodelist2.size == 1);
+
+  NodeList nodelist3 = step(nodelist2, 'b');
+
+  assert(nodelist3.nodes[0]->edge1->ch == 'b');
+
+  assert(nodelist3.size == 1);
+
+  NodeList nodelist4 = step(nodelist2, 'c');
+  assert(nodelist4.size == 0);
+}
+void test2() {
+
+  char *regex_code = "a|b";
+  Frag ff = constructNFA2(regex_code);
+
   if (ff.start->size != 2) {
     printf("error");
   }
@@ -125,7 +198,11 @@ void test2(Frag ff) {
   }
 }
 
-void test(Frag ff) {
+void test() {
+
+  char *regex_code = "abb";
+  Frag ff = constructNFA(regex_code);
+
   if (ff.start->size != 1) {
     printf("error");
   }
@@ -154,16 +231,10 @@ void test(Frag ff) {
   }
 }
 
-
-
-
 int main() {
 
-  /*char *regex_code = "abb";*/
-  /*Frag ff = constructNFA(regex_code);*/
-  /*test(ff);*/
+  /*  test();*/
+  /*test2();*/
 
-  char *regex_code = "a|b";
-  Frag ff = constructNFA2(regex_code);
-  test2(ff);
+  test3();
 }
