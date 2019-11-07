@@ -164,7 +164,7 @@ Frag constructFromFactor(Factor *factor) {
   Frag baseFrag = constructFromBase(factor->base);
   Frag accumFrag;
   if (factor->quan == ASTARISK) {
-    //accumFrag = baseFrag;
+    // accumFrag = baseFrag;
   } else {
     accumFrag = baseFrag;
   }
@@ -235,6 +235,51 @@ bool match(Frag regexFrag, char *target) {
   bool ifcontain = ifContainGoal(nodelist);
 
   return ifcontain;
+}
+
+typedef struct substringIndex {
+  int start;
+  int end;
+} substringIndex;
+
+typedef struct substringIndexs {
+  substringIndex **indexs;
+  int size;
+} substringIndexs;
+
+substringIndexs substringMatch(Frag regexFrag, char *target) {
+
+  int leng = strlen(target);
+  substringIndex **indexs = malloc(sizeof(substringIndex *) * 1000);
+
+  int counts = 0;
+  for (int i = 0; i < leng; i++) {
+
+    NodeList nodelist = {&regexFrag.start, 1};
+    int end_index = 0;
+    for (int j = i; j < leng; j++) {
+      nodelist = step(nodelist, target[j]);
+
+      bool ifcontain = ifContainGoal(nodelist);
+      if (nodelist.size == 0) {
+        break;
+      }
+      if (ifcontain) {
+        end_index = j;
+        break;
+      }
+    }
+
+    if (end_index != 0) {
+      substringIndex *index = malloc(sizeof(substringIndex));
+      index->start = i;
+      index->end = end_index;
+      indexs[counts] = index;
+      counts++;
+    }
+  }
+  substringIndexs subindexs = {indexs, counts};
+  return subindexs;
 }
 
 #endif

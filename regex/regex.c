@@ -41,7 +41,24 @@ void test7() {
 
   bool ifmatched = match(ff, "abbee");
 
-  assert(ifmatched== true);
+  assert(ifmatched == true);
+}
+
+void test8() {
+
+  char *regex_code = "abbee";
+  Frag ff = constructNFA3(regex_code);
+
+  substringIndexs indexs = substringMatch(ff, "aaabbeeeabbeee");
+
+  printf("%dmatched\n", indexs.size);
+
+  for (int i = 0; i < indexs.size; i++) {
+    int s = indexs.indexs[i]->start;
+    int e = indexs.indexs[i]->end;
+    printf("start_id:%d\n", s);
+    printf("end_id:%d\n", e);
+  }
 }
 
 void test3() {
@@ -150,4 +167,5 @@ int main() {
   test5();
   test6();
   test7();
+  test8();
 }
