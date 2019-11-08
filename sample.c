@@ -20,7 +20,7 @@ Line_contents split_by_newline(char *content, int size) {
     counter++;
     if (content[i] == '\n') {
       char *line_content = malloc(counter);
-      for (int j = 0; j < counter; j++) {
+      for (int j = 0; j < counter - 1; j++) {
         line_content[j] = content[j + start_id];
       }
 
@@ -74,8 +74,12 @@ int main(int argc, char *argv[]) {
         }
       } else {
         if (c == 127) {
+          //backspace
           process_backspace(line_contents, &cur_cursor);
           fflush(stdout);
+        } else if (c == 13) {
+          // enter key
+          process_enterkey(line_contents, &cur_cursor);
         } else {
           printf("%d", c);
           fflush(stdout);
@@ -83,8 +87,8 @@ int main(int argc, char *argv[]) {
       }
     } else {
       process_insert(line_contents, &cur_cursor, c);
-      //printf("%d ('%c')", c, c);
-      //fflush(stdout);
+      // printf("%d ('%c')", c, c);
+      // fflush(stdout);
     }
   }
   post_process();

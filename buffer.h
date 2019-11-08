@@ -20,7 +20,7 @@ void print_lines(Line_contents line_contents) {
   int size = line_contents.size;
 
   for (int i = 0; i < size; i++) {
-    printf("%s", line_contents.line_buffer[i]->content);
+    printf("%s\n", line_contents.line_buffer[i]->content);
     fflush(stdout);
   }
 }
@@ -32,7 +32,7 @@ void insert_one_buffer(Line_contents buffer, int offset_x, int offset_y,
                        char ch) {
 
   offset_y += -1;
-
+    
   if (buffer.line_buffer[offset_y]->size == buffer.line_buffer[offset_y]->cap) {
     char *newcontent = malloc(2 * buffer.line_buffer[offset_y]->cap);
     for (int i = 0 ;i < buffer.line_buffer[offset_y]->size; i++) {

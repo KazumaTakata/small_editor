@@ -26,12 +26,38 @@ void process_backspace(Line_contents buffer, Cursor *cur_cursor) {
   }
 }
 
-void process_insert(Line_contents buffer, Cursor *cur_cursor, char ch) {
+void process_enterkey(Line_contents buffer, Cursor *cur_cursor) {
+  int offset_y = cur_cursor->y - 1;
+  int offset_x = cur_cursor->x;
 
-  insert_one_buffer(buffer, cur_cursor->x, cur_cursor->y, ch );
+  int newline_size = buffer.line_buffer[offset_y]->size - offset_x;
+
+  char *newline = malloc(newline_size);
+
+  for (int i = 0; i < newline_size; i++) {
+    newline[i] = buffer.line_buffer[offset_y]->content[offset_x + i];
+    buffer.line_buffer[offset_y]->content[offset_x + i] = 0x00;
+  }
+
+  buffer.line_buffer[offset_y]->size = offset_x;
+
+  for (int i = buffer.size; i > offset_y; i--) {
+    buffer.line_buffer[i + 1] = buffer.line_buffer[i];
+  }
+  buffer.size += 1;
+  Line_buffer *newlinebuffer = malloc(sizeof(Line_buffer));
+  newlinebuffer->content = newline;
+  newlinebuffer->size = newline_size;
+
+  buffer.line_buffer[offset_y + 1] = newlinebuffer;
+
+  update_display(buffer, cur_cursor);
+}
+
+void process_insert(Line_contents buffer, Cursor *cur_cursor, char ch) {
+  insert_one_buffer(buffer, cur_cursor->x, cur_cursor->y, ch);
   cur_cursor->x += 1;
   term_goto(cur_cursor->x, cur_cursor->y);
   update_display(buffer, cur_cursor);
 }
-
 #endif
