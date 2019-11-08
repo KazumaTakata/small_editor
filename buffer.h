@@ -7,7 +7,6 @@ typedef struct Line_buffer {
   int size;
 } Line_buffer;
 
-
 typedef struct Line_contents Line_contents;
 
 struct Line_contents {
@@ -34,17 +33,18 @@ void insert_one_buffer(Line_contents *buffer, int offset_x, int offset_y,
 
   offset_y += -1;
 
-  if (buffer->line_buffer[offset_y]->size ==
+  if (buffer->line_buffer[offset_y]->size >=
       buffer->line_buffer[offset_y]->cap) {
-    char *newcontent = malloc(2 * buffer->line_buffer[offset_y]->cap);
+    char *newcontent = calloc(2 * buffer->line_buffer[offset_y]->cap, sizeof(char) );
     for (int i = 0; i < buffer->line_buffer[offset_y]->size; i++) {
       newcontent[i] = buffer->line_buffer[offset_y]->content[i];
     }
     free(buffer->line_buffer[offset_y]->content);
     buffer->line_buffer[offset_y]->content = newcontent;
+    buffer->line_buffer[offset_y]->cap = 2 * buffer->line_buffer[offset_y]->cap;
   }
 
-  for (int i = buffer->line_buffer[offset_y]->size; i > offset_x - 2; i--) {
+  for (int i = buffer->line_buffer[offset_y]->size; i >= offset_x -1 ; i--) {
     buffer->line_buffer[offset_y]->content[i + 1] =
         buffer->line_buffer[offset_y]->content[i];
   }

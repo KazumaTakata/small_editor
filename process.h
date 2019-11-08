@@ -15,7 +15,7 @@ void post_process() { term_clear(); }
 // return offset + cursor.x;
 /*}*/
 
-void process_backspace(Line_contents* buffer, Cursor *cur_cursor) {
+void process_backspace(Line_contents *buffer, Cursor *cur_cursor) {
 
   if (cur_cursor->x > 1) {
     delete_one_buffer(buffer, cur_cursor->x, cur_cursor->y);
@@ -26,16 +26,16 @@ void process_backspace(Line_contents* buffer, Cursor *cur_cursor) {
   }
 }
 
-void process_enterkey(Line_contents* buffer, Cursor *cur_cursor) {
+void process_enterkey(Line_contents *buffer, Cursor *cur_cursor) {
   int offset_y = cur_cursor->y - 1;
   int offset_x = cur_cursor->x - 1;
 
   int newline_size = buffer->line_buffer[offset_y]->size - offset_x;
 
-  char *newline = malloc(newline_size);
+  char *newline = calloc(newline_size * 2 , 1);
 
   for (int i = 0; i < newline_size; i++) {
-    newline[i] = buffer->line_buffer[offset_y]->content[offset_x + i ];
+    newline[i] = buffer->line_buffer[offset_y]->content[offset_x + i];
     buffer->line_buffer[offset_y]->content[offset_x + i] = 0x00;
   }
 
@@ -48,16 +48,17 @@ void process_enterkey(Line_contents* buffer, Cursor *cur_cursor) {
   Line_buffer *newlinebuffer = malloc(sizeof(Line_buffer));
   newlinebuffer->content = newline;
   newlinebuffer->size = newline_size;
+  newlinebuffer->cap = newline_size * 2;
 
   buffer->line_buffer[offset_y + 1] = newlinebuffer;
 
   update_display(buffer, cur_cursor);
   cur_cursor->x = 1;
   cur_cursor->y = cur_cursor->y + 1;
-  term_goto(cur_cursor->x , cur_cursor->y );
+  term_goto(cur_cursor->x, cur_cursor->y);
 }
 
-void process_insert(Line_contents* buffer, Cursor *cur_cursor, char ch) {
+void process_insert(Line_contents *buffer, Cursor *cur_cursor, char ch) {
   insert_one_buffer(buffer, cur_cursor->x, cur_cursor->y, ch);
   cur_cursor->x += 1;
   term_goto(cur_cursor->x, cur_cursor->y);

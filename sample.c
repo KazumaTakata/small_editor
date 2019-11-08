@@ -21,14 +21,14 @@ Line_contents split_by_newline(char *content, int size) {
     if (content[i] == '\n') {
       // remove \n;
       int accutual_size = counter - 1;
-      char *line_content = malloc(accutual_size);
+      char *line_content = malloc(accutual_size * 2);
       for (int j = 0; j < accutual_size; j++) {
         line_content[j] = content[j + start_id];
       }
 
       Line_buffer *line_buffer = malloc(sizeof(Line_buffer));
       line_buffer->content = line_content;
-      line_buffer->cap = accutual_size ;
+      line_buffer->cap = accutual_size*2 ;
       line_buffer->size = accutual_size ;
 
       line_contents[line_id] = line_buffer;
