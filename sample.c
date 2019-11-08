@@ -2,8 +2,8 @@
 #include "./raw_mode.h"
 #include "./term.h"
 #include <ctype.h>
-
 #include "./buffer.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
@@ -19,15 +19,17 @@ Line_contents split_by_newline(char *content, int size) {
   for (int i = 0; i < size; i++) {
     counter++;
     if (content[i] == '\n') {
-      char *line_content = malloc(counter);
-      for (int j = 0; j < counter - 1; j++) {
+      // remove \n;
+      int accutual_size = counter - 1;
+      char *line_content = malloc(accutual_size);
+      for (int j = 0; j < accutual_size; j++) {
         line_content[j] = content[j + start_id];
       }
 
       Line_buffer *line_buffer = malloc(sizeof(Line_buffer));
       line_buffer->content = line_content;
-      line_buffer->cap = counter;
-      line_buffer->size = counter;
+      line_buffer->cap = accutual_size ;
+      line_buffer->size = accutual_size ;
 
       line_contents[line_id] = line_buffer;
 
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]) {
   term_clear();
   term_goto(cur_cursor.x, cur_cursor.y);
   enableRawMode();
-  print_lines(line_contents);
+  print_lines(&line_contents);
   term_goto(cur_cursor.x, cur_cursor.y);
 
   char c;
@@ -70,23 +72,23 @@ int main(int argc, char *argv[]) {
         read(STDIN_FILENO, &c, 1);
         if (c == '[') {
           read(STDIN_FILENO, &c, 1);
-          move_cursor(c, &cur_cursor);
+          move_cursor(&line_contents  , c, &cur_cursor);
         }
       } else {
         if (c == 127) {
           //backspace
-          process_backspace(line_contents, &cur_cursor);
+          process_backspace(&line_contents, &cur_cursor);
           fflush(stdout);
         } else if (c == 13) {
           // enter key
-          process_enterkey(line_contents, &cur_cursor);
+          process_enterkey(&line_contents, &cur_cursor);
         } else {
           printf("%d", c);
           fflush(stdout);
         }
       }
     } else {
-      process_insert(line_contents, &cur_cursor, c);
+      process_insert(&line_contents, &cur_cursor, c);
       // printf("%d ('%c')", c, c);
       // fflush(stdout);
     }

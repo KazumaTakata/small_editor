@@ -1,12 +1,15 @@
 #ifndef HTERM
 #define HTERM
 
+#include "./buffer.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
+
+// typedef struct Line_contents Line_contents;
 
 typedef enum {
   BLACK,
@@ -58,27 +61,44 @@ void term_resetColor() {
   fflush(stdout);
 }
 
-void move_cursor(char arrow, Cursor *cur_cursor) {
-  printf("\033[%c", arrow);
-  fflush(stdout);
+void move_cursor(Line_contents *buffer, char arrow, Cursor *cur_cursor) {
+  // printf("\033[%c", arrow);
+  // fflush(stdout);
   switch (arrow) {
-  case 'A':
+  case 'A': {
     if (cur_cursor->y > 1) {
+      int line_size = buffer->line_buffer[cur_cursor->y - 2]->size;
+      if (line_size < cur_cursor->x) {
+        cur_cursor->x = line_size;
+      }
       cur_cursor->y -= 1;
     }
     break;
-  case 'B':
+  }
+  case 'B': {
+    int line_size = buffer->line_buffer[cur_cursor->y]->size;
+    if (line_size < cur_cursor->x) {
+      cur_cursor->x = line_size;
+    }
     cur_cursor->y += 1;
     break;
-  case 'C':
-    cur_cursor->x += 1;
+  }
+  case 'C': {
+    int line_size = buffer->line_buffer[cur_cursor->y - 1]->size;
+    if (line_size > cur_cursor->x) {
+      cur_cursor->x += 1;
+    } else {
+      cur_cursor->x = line_size;
+    }
     break;
+  }
   case 'D':
     if (cur_cursor->x > 1) {
       cur_cursor->x -= 1;
     }
     break;
   }
+  term_goto(cur_cursor->x, cur_cursor->y);
 }
 
 void term_setBackColor(color8 color) {
