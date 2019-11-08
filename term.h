@@ -69,18 +69,26 @@ void move_cursor(Line_contents *buffer, char arrow, Cursor *cur_cursor) {
     if (cur_cursor->y > 1) {
       int line_size = buffer->line_buffer[cur_cursor->y - 2]->size;
       if (line_size < cur_cursor->x) {
-        cur_cursor->x = line_size+ 1;
+        if (line_size == 0) {
+          cur_cursor->x = 1;
+        } else {
+          cur_cursor->x = line_size;
+        }
       }
       cur_cursor->y -= 1;
     }
     break;
   }
   case 'B': {
-    if (buffer->size > cur_cursor->y  ) {
+    if (buffer->size > cur_cursor->y) {
 
       int line_size = buffer->line_buffer[cur_cursor->y]->size;
       if (line_size < cur_cursor->x) {
-        cur_cursor->x = line_size+1;
+        if (line_size == 0) {
+          cur_cursor->x = 1;
+        } else {
+          cur_cursor->x = line_size;
+        }
       }
       cur_cursor->y += 1;
     }
@@ -91,7 +99,12 @@ void move_cursor(Line_contents *buffer, char arrow, Cursor *cur_cursor) {
     if (line_size > cur_cursor->x) {
       cur_cursor->x += 1;
     } else {
-      cur_cursor->x = line_size;
+      if (line_size == 0) {
+        cur_cursor->x = 1;
+      } else {
+
+        cur_cursor->x = line_size;
+      }
     }
     break;
   }

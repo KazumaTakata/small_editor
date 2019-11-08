@@ -31,9 +31,16 @@ void process_enterkey(Line_contents *buffer, Cursor *cur_cursor) {
   int offset_x = cur_cursor->x - 1;
 
   int newline_size = buffer->line_buffer[offset_y]->size - offset_x;
+  int cap;
 
-  char *newline = calloc(newline_size * 2 , 1);
-
+  char *newline;
+  if (newline_size <= 0) {
+    cap = 2;
+    newline = calloc(2, sizeof(char) );
+  } else {
+    cap = newline_size * 2;
+    newline = calloc(newline_size * 2 + 1, sizeof(char)  ) ;
+  }
   for (int i = 0; i < newline_size; i++) {
     newline[i] = buffer->line_buffer[offset_y]->content[offset_x + i];
     buffer->line_buffer[offset_y]->content[offset_x + i] = 0x00;
@@ -48,8 +55,7 @@ void process_enterkey(Line_contents *buffer, Cursor *cur_cursor) {
   Line_buffer *newlinebuffer = malloc(sizeof(Line_buffer));
   newlinebuffer->content = newline;
   newlinebuffer->size = newline_size;
-  newlinebuffer->cap = newline_size * 2;
-
+  newlinebuffer->cap = cap;
   buffer->line_buffer[offset_y + 1] = newlinebuffer;
 
   update_display(buffer, cur_cursor);

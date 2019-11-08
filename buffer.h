@@ -33,7 +33,7 @@ void insert_one_buffer(Line_contents *buffer, int offset_x, int offset_y,
 
   offset_y += -1;
 
-  if (buffer->line_buffer[offset_y]->size >=
+  if (buffer->line_buffer[offset_y]->size + 1 >=
       buffer->line_buffer[offset_y]->cap) {
     char *newcontent = calloc(2 * buffer->line_buffer[offset_y]->cap, sizeof(char) );
     for (int i = 0; i < buffer->line_buffer[offset_y]->size; i++) {
